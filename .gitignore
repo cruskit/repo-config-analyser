@@ -153,4 +153,12 @@ jspm_packages/
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db 
+Thumbs.db
+
+# Generated reports
+repo-config-analysis-*.html
+repo-deviations-*.html
+
+# Environment variables
+.env.local
+.env.production 

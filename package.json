@@ -4,8 +4,34 @@
   "description": "Analyse Github Repository config within an org to identify anomalies",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "test": "node test.js",
+    "example": "node example.js",
+    "dev": "node index.js"
   },
+  "keywords": [
+    "github",
+    "repository",
+    "configuration",
+    "analysis",
+    "compliance",
+    "audit",
+    "organization"
+  ],
   "author": "Paul Ruskin",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@octokit/rest": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/repo-config-analyser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/repo-config-analyser/issues"
+  },
+  "homepage": "https://github.com/yourusername/repo-config-analyser#readme"
 }
