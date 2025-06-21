@@ -1,0 +1,11 @@
+{
+  "name": "repo-config-analyser",
+  "version": "1.0.0",
+  "description": "Analyse Github Repository config within an org to identify anomalies",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Paul Ruskin",
+  "license": "MIT"
+}
