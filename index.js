@@ -202,17 +202,34 @@ class RepoConfigAnalyzer {
                     .sort(([,a], [,b]) => b - a)[0];
                 norms[field] = mostCommon ? JSON.parse(mostCommon[0]) : null;
             } else {
-                // For simple values, find the most common value
+                // For simple values, find the most common value while preserving data types
                 const valueCounts = {};
                 values.forEach(value => {
                     if (value !== null && value !== undefined) {
-                        const key = String(value);
+                        // Use the value itself as the key to preserve data types
+                        const key = typeof value === 'object' ? JSON.stringify(value) : value;
                         valueCounts[key] = (valueCounts[key] || 0) + 1;
                     }
                 });
                 const mostCommon = Object.entries(valueCounts)
                     .sort(([,a], [,b]) => b - a)[0];
-                norms[field] = mostCommon ? mostCommon[0] : null;
+                
+                if (mostCommon) {
+                    // Convert back to original data type if it was a string representation
+                    const key = mostCommon[0];
+                    if (key === 'true') {
+                        norms[field] = true;
+                    } else if (key === 'false') {
+                        norms[field] = false;
+                    } else if (!isNaN(key) && key !== '') {
+                        // Try to convert to number if it looks like a number
+                        norms[field] = Number(key);
+                    } else {
+                        norms[field] = key;
+                    }
+                } else {
+                    norms[field] = null;
+                }
             }
         });
         
@@ -264,7 +281,35 @@ class RepoConfigAnalyzer {
                     };
                 }
             } else {
-                if (repoValue !== normValue) {
+                // For simple values, handle type coercion
+                let isDifferent = false;
+                
+                if (repoValue === normValue) {
+                    // Values are exactly the same
+                    isDifferent = false;
+                } else if (repoValue === null || normValue === null) {
+                    // One is null, the other isn't
+                    isDifferent = repoValue !== normValue;
+                } else if (typeof repoValue === 'boolean' && typeof normValue === 'boolean') {
+                    // Both are booleans, compare directly
+                    isDifferent = repoValue !== normValue;
+                } else if (typeof repoValue === 'number' && typeof normValue === 'number') {
+                    // Both are numbers, compare directly
+                    isDifferent = repoValue !== normValue;
+                } else if (typeof repoValue === 'string' && typeof normValue === 'string') {
+                    // Both are strings, compare directly
+                    isDifferent = repoValue !== normValue;
+                } else {
+                    // Different types, try to coerce for comparison
+                    const repoCoerced = repoValue === true || repoValue === 'true' ? true : 
+                                      repoValue === false || repoValue === 'false' ? false : repoValue;
+                    const normCoerced = normValue === true || normValue === 'true' ? true : 
+                                      normValue === false || normValue === 'false' ? false : normValue;
+                    
+                    isDifferent = repoCoerced !== normCoerced;
+                }
+                
+                if (isDifferent) {
                     deviations[field] = {
                         repo: repoValue,
                         norm: normValue
