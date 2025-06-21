@@ -209,6 +209,9 @@ class RepoConfigAnalyzer {
                         // Use the value itself as the key to preserve data types
                         const key = typeof value === 'object' ? JSON.stringify(value) : value;
                         valueCounts[key] = (valueCounts[key] || 0) + 1;
+                    } else {
+                        // Treat null and undefined as equivalent
+                        valueCounts['null'] = (valueCounts['null'] || 0) + 1;
                     }
                 });
                 const mostCommon = Object.entries(valueCounts)
@@ -221,6 +224,8 @@ class RepoConfigAnalyzer {
                         norms[field] = true;
                     } else if (key === 'false') {
                         norms[field] = false;
+                    } else if (key === 'null') {
+                        norms[field] = null;
                     } else if (!isNaN(key) && key !== '') {
                         // Try to convert to number if it looks like a number
                         norms[field] = Number(key);
@@ -281,15 +286,21 @@ class RepoConfigAnalyzer {
                     };
                 }
             } else {
-                // For simple values, handle type coercion
+                // For simple values, handle type coercion and null/undefined equivalence
                 let isDifferent = false;
+                
+                // Helper function to check if values are effectively null/undefined
+                const isNullOrUndefined = (value) => value === null || value === undefined;
                 
                 if (repoValue === normValue) {
                     // Values are exactly the same
                     isDifferent = false;
-                } else if (repoValue === null || normValue === null) {
-                    // One is null, the other isn't
-                    isDifferent = repoValue !== normValue;
+                } else if (isNullOrUndefined(repoValue) && isNullOrUndefined(normValue)) {
+                    // Both are null/undefined - treat as equivalent
+                    isDifferent = false;
+                } else if (isNullOrUndefined(repoValue) || isNullOrUndefined(normValue)) {
+                    // One is null/undefined, the other isn't
+                    isDifferent = true;
                 } else if (typeof repoValue === 'boolean' && typeof normValue === 'boolean') {
                     // Both are booleans, compare directly
                     isDifferent = repoValue !== normValue;
